@@ -7,16 +7,14 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
 import com.example.financask.R
+import com.example.financask.databinding.TransacaoItemBinding
 import com.example.financask.extension.formataParaBrasileiro
+import com.example.financask.extension.limitaEmAte
 import com.example.financask.model.Tipo
 import com.example.financask.model.Transacao
-import kotlinx.android.synthetic.main.transacao_item.view.*
 
-class ListaTransacoesAdapter(transacoes : List<Transacao>,
-context : Context) : BaseAdapter() {
-
-    private val transacoes =  transacoes
-    private val context = context
+class ListaTransacoesAdapter(private val transacoes : List<Transacao>,
+                             private val context : Context) : BaseAdapter() {
 
 
     override fun getCount(): Int {
@@ -31,25 +29,53 @@ context : Context) : BaseAdapter() {
         return 0
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val viewCriada = LayoutInflater.from(context).inflate(R.layout.transacao_item, parent, false)
+    private val limiteDeCaracteres = 14
 
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val viewCriada = TransacaoItemBinding.inflate(LayoutInflater.from(context), parent, false)
         val transacao = transacoes[position]
 
-        if (transacao.tipo == Tipo.RECEITA) {
-            viewCriada.transacao_valor.setTextColor(ContextCompat.getColor(context, R.color.receita))
-            viewCriada.transacao_icone.setBackgroundResource(R.drawable.icone_transacao_item_receita)
-        }else{
-            viewCriada.transacao_valor.setTextColor(ContextCompat.getColor(context, R.color.despesa))
-            viewCriada.transacao_icone.setBackgroundResource(R.drawable.icone_transacao_item_despesa)
-        }
+        adicionaTransacao(transacao, viewCriada)
 
-        viewCriada.transacao_valor.text = transacao.valor.formataParaBrasileiro()
-        viewCriada.transacao_categoria.text = transacao.categoria
-        viewCriada.transacao_data.text = transacao.data.formataParaBrasileiro()
-
-        return viewCriada
+        return viewCriada.root
     }
 
+    private fun adicionaTransacao(transacao: Transacao, viewCriada: TransacaoItemBinding) {
+        adicionaValor(transacao, viewCriada)
+        adicionaIcone(transacao, viewCriada)
+        adicionaCategoria(viewCriada, transacao)
+        adcionaData(viewCriada, transacao)
+    }
 
+    private fun adcionaData(viewCriada: TransacaoItemBinding, transacao: Transacao) {
+        viewCriada.transacaoData.text = transacao.data.formataParaBrasileiro()
+    }
+
+    private fun adicionaCategoria(viewCriada: TransacaoItemBinding, transacao: Transacao) {
+        viewCriada.transacaoCategoria.text = transacao.categoria.limitaEmAte(limiteDeCaracteres)
+    }
+
+    private fun adicionaIcone(transacao: Transacao, viewCriada: TransacaoItemBinding) {
+        val icone: Int = iconePor(transacao.tipo)
+        viewCriada.transacaoIcone.setBackgroundResource(icone)
+    }
+
+    private fun iconePor(tipo: Tipo) =
+            when (tipo) {
+                Tipo.RECEITA -> R.drawable.icone_transacao_item_receita
+                Tipo.DESPESA -> R.drawable.icone_transacao_item_despesa
+            }
+
+    private fun adicionaValor(transacao: Transacao, viewCriada: TransacaoItemBinding) {
+        val cor = corPor(transacao.tipo)
+        viewCriada.transacaoValor.setTextColor(cor)
+        viewCriada.transacaoValor.text = transacao.valor.formataParaBrasileiro()
+    }
+
+    private fun corPor(tipo: Tipo): Int {
+        when (tipo) {
+            Tipo.RECEITA -> return ContextCompat.getColor(context, R.color.receita)
+            Tipo.DESPESA -> return ContextCompat.getColor(context, R.color.despesa)
+        }
+    }
 }

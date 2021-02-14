@@ -1,28 +1,37 @@
 package com.example.financask.ui.activity
 
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.financask.R
+import com.example.financask.databinding.ActivityListaTransacoesBinding
 import com.example.financask.model.Tipo
 import com.example.financask.model.Transacao
+
 import com.example.financask.ui.adapter.ListaTransacoesAdapter
-import kotlinx.android.synthetic.main.activity_lista_transacoes.*
 import java.math.BigDecimal
-import java.util.*
 
 class ListaTransacoesActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityListaTransacoesBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_lista_transacoes)
+        binding = ActivityListaTransacoesBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        val frutas = listOf(Transacao(valor = BigDecimal(10.0),
-        tipo = Tipo.DESPESA),
-        Transacao(valor = BigDecimal(11.0),
-        categoria = "lazer", Tipo.RECEITA))
+        val transacoes = transacoesExemplos()
 
-        lista_transacoes_listview.adapter = ListaTransacoesAdapter(frutas, this)
+        configuraLista(transacoes)
 
     }
+
+    private fun configuraLista(transacoes: List<Transacao>) {
+        binding.listaTransacoesListview.adapter = ListaTransacoesAdapter(transacoes, this)
+    }
+
+    private fun transacoesExemplos() = listOf(Transacao(valor = BigDecimal(10.0),
+            tipo = Tipo.DESPESA),
+            Transacao(valor = BigDecimal(11.0),
+                    categoria = "lazer", Tipo.RECEITA))
 }
