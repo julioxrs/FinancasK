@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.financask.databinding.ActivityListaTransacoesBinding
 import com.example.financask.delegate.TransacaoDelegate
+import com.example.financask.model.Tipo
 import com.example.financask.model.Transacao
 import com.example.financask.ui.ResumoView
 import com.example.financask.ui.adapter.ListaTransacoesAdapter
@@ -23,19 +24,26 @@ class ListaTransacoesActivity : AppCompatActivity() {
         setContentView(view)
 
         calculaResumo()
-
         configuraLista()
 
         binding.listaTransacoesAdicionaReceita.setOnClickListener {
-            AdicionaTransacaoDialog(window.decorView as ViewGroup, this)
-                    .configuraDialog(object : TransacaoDelegate {
-                        override fun delegate(transacao: Transacao) {
-                            atualizaTransacao(transacao)
-                            binding.listaTransacoesAdicionaMenu.close(true)
-                        }
-                    })
+            chamaDialogAdicao(Tipo.RECEITA)
         }
 
+        binding.listaTransacoesAdicionaDespesa.setOnClickListener {
+            chamaDialogAdicao(Tipo.DESPESA)
+        }
+    }
+
+    private fun chamaDialogAdicao(tipo: Tipo) {
+        AdicionaTransacaoDialog(window.decorView as ViewGroup, this)
+                .chama(tipo, object: TransacaoDelegate{
+                    override fun delegate(transacao: Transacao) {
+                        atualizaTransacao(transacao)
+                        binding.listaTransacoesAdicionaMenu.close(true)
+                    }
+
+                })
     }
 
     private fun atualizaTransacao(transacaoCriada: Transacao) {

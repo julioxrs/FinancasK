@@ -21,28 +21,31 @@ class AdicionaTransacaoDialog(private val view: ViewGroup,
                               private val context: Context) {
 
     private val formView = criaLayout()
+    private val campoData = formView.formTransacaoData
+    private val campoValor = formView.formTransacaoValor
+    private val campoCategoria = formView.formTransacaoCategoria
 
-     fun configuraDialog(transacaoDelegate: TransacaoDelegate) {
-
+     fun chama(tipo: Tipo, transacaoDelegate: TransacaoDelegate) {
         configuraCampoData()
-        configuraCampoCategoria()
-        configuraFomulario(transacaoDelegate)
+        configuraCampoCategoria(tipo)
+        configuraFomulario(tipo, transacaoDelegate)
     }
 
-    private fun configuraFomulario(transacaoDelegate: TransacaoDelegate) {
+    private fun configuraFomulario(tipo: Tipo, transacaoDelegate: TransacaoDelegate) {
+        val titulo = valorPor(tipo)
+
         AlertDialog.Builder(context)
-                .setTitle(R.string.adiciona_receita)
+                .setTitle(titulo)
                 .setView(formView.root)
                 .setPositiveButton("Adicionar") { _, _ ->
-                    val dataEmTexto = formView.formTransacaoData.text.toString()
-                    val valorEmTexto = formView.formTransacaoValor.text.toString()
-                    val categoriaEmTexto = formView.formTransacaoCategoria.selectedItem.toString()
+                    val dataEmTexto = campoData.text.toString()
+                    val valorEmTexto = campoValor.text.toString()
+                    val categoriaEmTexto = campoCategoria.selectedItem.toString()
 
                     val valor = converteCampoValor(valorEmTexto)
-
                     val data = dataEmTexto.converteParaCalendar()
 
-                    val transacaoCriada = Transacao(tipo = Tipo.RECEITA,
+                    val transacaoCriada = Transacao(tipo = tipo,
                             data = data,
                             valor = valor,
                             categoria = categoriaEmTexto)
@@ -51,6 +54,12 @@ class AdicionaTransacaoDialog(private val view: ViewGroup,
                 }
                 .setNegativeButton("Cancelar", null)
                 .show()
+    }
+
+    private fun valorPor(tipo: Tipo) = if (tipo == Tipo.RECEITA) {
+        R.string.adiciona_receita
+    } else {
+        R.string.adiciona_despesa
     }
 
     private fun converteCampoValor(valorEmTexto: String) = try {
@@ -62,11 +71,21 @@ class AdicionaTransacaoDialog(private val view: ViewGroup,
         BigDecimal.ZERO
     }
 
-    private fun configuraCampoCategoria() {
+    private fun configuraCampoCategoria(tipo: Tipo) {
+
+        val categorias = categoriaPor(tipo)
+
         val adapter = ArrayAdapter.createFromResource(context,
-                R.array.categorias_de_receita,
+                categorias,
                 android.R.layout.simple_spinner_dropdown_item)
-        formView.formTransacaoCategoria.adapter = adapter
+        campoCategoria.adapter = adapter
+    }
+
+    private fun categoriaPor(tipo: Tipo) : Int {
+        if (tipo == Tipo.RECEITA) {
+            return R.array.categorias_de_receita
+        }
+        return R.array.categorias_de_despesa
     }
 
     private fun configuraCampoData() {
@@ -76,14 +95,14 @@ class AdicionaTransacaoDialog(private val view: ViewGroup,
         val dia = hoje.get(Calendar.DAY_OF_MONTH)
 
 
-        formView.formTransacaoData.setText(hoje.formataParaBrasileiro())
+        campoData.setText(hoje.formataParaBrasileiro())
 
-        formView.formTransacaoData.setOnClickListener {
+        campoData.setOnClickListener {
             DatePickerDialog(context,
                     { _, year, month, dayOfMonth ->
                         val dataSelecionada = Calendar.getInstance()
                         dataSelecionada.set(year, month, dayOfMonth)
-                        formView.formTransacaoData.setText(dataSelecionada.formataParaBrasileiro())
+                        campoData.setText(dataSelecionada.formataParaBrasileiro())
                     }, ano, mes, dia)
                     .show()
         }
