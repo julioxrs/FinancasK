@@ -2,10 +2,8 @@ package com.example.financask.ui.activity
 
 import android.os.Bundle
 import android.view.ViewGroup
-import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.financask.databinding.ActivityListaTransacoesBinding
-import com.example.financask.delegate.TransacaoDelegate
 import com.example.financask.model.Tipo
 import com.example.financask.model.Transacao
 import com.example.financask.ui.ResumoView
@@ -46,13 +44,10 @@ class ListaTransacoesActivity : AppCompatActivity() {
 
     private fun chamaDialogAdicao(tipo: Tipo) {
         AdicionaTransacaoDialog(viewGroupDaActivity, this)
-                .chama(tipo, object : TransacaoDelegate {
-                    override fun delegate(transacao: Transacao) {
-                        adiciona(transacao)
+                .chama(tipo) { transacaoCriada ->
+                        adiciona(transacaoCriada)
                         binding.listaTransacoesAdicionaMenu.close(true)
-                    }
-
-                })
+                }
     }
 
     private fun adiciona(transacao: Transacao) {
@@ -84,11 +79,9 @@ class ListaTransacoesActivity : AppCompatActivity() {
 
     private fun chamaDialogDeAlteracao(transacao: Transacao, position: Int) {
         AlteraTransacaoDialog(viewGroupDaActivity, this)
-                .chama(transacao, object : TransacaoDelegate {
-                    override fun delegate(transacao: Transacao) {
-                        altera(transacao, position)
-                    }
-                })
+                .chama(transacao) {transacaoModificada ->
+                        altera(transacaoModificada, position)
+                }
     }
 
     private fun altera(transacao: Transacao, position: Int) {

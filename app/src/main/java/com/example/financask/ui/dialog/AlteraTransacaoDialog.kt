@@ -1,9 +1,8 @@
-package com.example.financask.ui.dialog
+    package com.example.financask.ui.dialog
 
 import android.content.Context
 import android.view.ViewGroup
 import com.example.financask.R
-import com.example.financask.delegate.TransacaoDelegate
 import com.example.financask.extension.formataParaBrasileiro
 import com.example.financask.model.Tipo
 import com.example.financask.model.Transacao
@@ -15,9 +14,9 @@ class AlteraTransacaoDialog(
     override val textoPositiveButton: String
         get() = "Alterar"
 
-    fun chama(transacao: Transacao, transacaoDelegate: TransacaoDelegate) {
+    fun chama(transacao: Transacao, delegate: (transacao : Transacao) -> Unit) {
         val tipo = transacao.tipo
-        super.chama(tipo, transacaoDelegate)
+        super.chama(tipo, delegate)
         inicializaCampos(transacao)
     }
 
